@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment files
+.env
+.env*
+
+# Build outputs
+.next/
+build/
+dist/
+out/
+
+# Generated files
+/generated/
+*.tsbuildinfo
+next-env.d.ts
+
+# System files
+.DS_Store
+*.pem
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# IDE files
+.vscode/
+.idea/
+
+# Testing
+coverage/
+
+# Production
+.vercel
+
+# Misc
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions

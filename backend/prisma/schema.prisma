@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  logFiles LogFile[]
+  
+  @@map("users")
+}
+
+model LogFile {
+  id          String   @id @default(cuid())
+  filename    String
+  originalName String
+  fileSize    Int
+  uploadDate  DateTime @default(now())
+  status      String   @default("processing") // processing, completed, error
+  totalEntries Int     @default(0)
+  
+  // Relations
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logEntries LogEntry[]
+  
+  @@map("log_files")
+}
+
+model LogEntry {
+  id          String   @id @default(cuid())
+  timestamp   DateTime
+  
+  // User Information
+  login       String?
+  department  String?
+  company     String?
+  cloudName   String?
+  
+  // Network
+  clientIP    String?
+  clientInternalIP String?
+  clientPublicIP String?
+  serverIP    String?
+  location    String?
+  
+  // HTTP Transaction
+  url         String?
+  host        String?
+  requestMethod String?
+  responseCode String?
+  userAgent   String?
+  referer     String?
+  contentType String?
+  
+  // Policy and Action
+  action      String?  // Allowed, Blocked, etc.
+  reason      String?
+  ruleType    String?
+  ruleLabel   String?
+  
+  // Threat Protection
+  threatName  String?
+  threatSeverity String?
+  riskScore   Int?
+  malwareCategory String?
+  malwareClass String?
+  
+  // URL Categorization
+  urlCategory String?
+  urlSuperCategory String?
+  urlClass    String?
+  
+  // Cloud Application
+  appName     String?
+  appClass    String?
+  appRiskScore String?
+  
+  // File Information
+  fileName    String?
+  fileType    String?
+  fileClass   String?
+  
+  // SSL Information
+  sslDecrypted String?
+  clientTLSVersion String?
+  serverTLSVersion String?
+  
+  // Bandwidth and Size
+  requestSize Int?
+  responseSize Int?
+  totalSize   Int?
+  
+  // Geographic Information
+  sourceIPCountry String?
+  destinationIPCountry String?
+  
+  // Device Information
+  deviceHostname String?
+  deviceType String?
+  deviceOSType String?
+  
+  // DLP Information
+  dlpDictionary String?
+  dlpEngine String?
+  dlpRuleName String?
+  
+  // Relations
+  logFileId   String
+  logFile     LogFile  @relation(fields: [logFileId], references: [id], onDelete: Cascade)
+  
+  // Indexes for efficient querying
+  @@index([timestamp])
+  @@index([clientIP])
+  @@index([action])
+  @@index([threatSeverity])
+  @@index([logFileId])
+  
+  @@map("log_entries")
+}
+
+model AnalysisResult {
+  id          String   @id @default(cuid())
+  logFileId   String   @unique
+  analysisDate DateTime @default(now())
+  
+  // Summary statistics
+  totalRequests    Int
+  blockedRequests  Int
+  allowedRequests  Int
+  uniqueIPs        Int
+  uniqueURLs       Int
+  topThreats       String[] // JSON array of top threats
+  topCategories    String[] // JSON array of top categories
+  topSourceIPs     String[] // JSON array of top source IPs
+  
+  // Timeline data (JSON for flexibility)
+  hourlyBreakdown  String // JSON object with hour -> count mapping
+  dailyBreakdown   String // JSON object with date -> count mapping
+  
+  // Security insights
+  suspiciousIPs    String[] // JSON array of suspicious IPs
+  highSeverityEvents Int
+  
+  @@map("analysis_results")
+}
